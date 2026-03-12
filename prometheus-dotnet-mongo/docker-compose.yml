@@ -1,0 +1,42 @@
+services:
+  api:
+    build: .
+    container_name: dotnet-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongo_data:/data/db
+
+  mongoexporter:
+    image: fabricioveronez/mongo_exporter
+    container_name: mongo_exporter
+    ports:
+      - "9216:9216"
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URI: "mongodb://admin:admin123@mongo:27017/?authSource=admin"
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+volumes:
+  mongo_data:
