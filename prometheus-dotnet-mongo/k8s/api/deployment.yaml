@@ -9,9 +9,13 @@ spec:
   selector:
     matchLabels:
       app: app
-  replicas: 1
+  replicas: 2
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
       labels:
         app:  app
     spec:
@@ -30,6 +34,11 @@ spec:
             cpu: 100m
             memory: 100Mi
         ports:
-        - containerPort:  80
+        - containerPort:  8080
           name:  app-prometheus
+        env:
+          - name: DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE
+            value: "false"
+          - name: ASPNETCORE_URLS
+            value: "http://+:8080"
       restartPolicy: Always
