@@ -1,0 +1,76 @@
+groups:
+  - name: app-alerts
+    rules:
+
+      # 🚨 API indisponível
+      - alert: AppDown
+        expr: up{job="app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API está fora do ar"
+          description: "A aplicação não está respondendo há mais de 1 minuto"
+
+      # ⚠️ Alta taxa de erro HTTP
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[1m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta taxa de erros HTTP"
+          description: "Mais de 1 erro/s nos últimos minutos"
+
+      # 📈 Alto uso de CPU
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[1m]) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de CPU"
+          description: "Uso de CPU acima de 80%"
+
+      # 🧠 Alto uso de memória
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 200000000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de memória"
+          description: "Uso de memória acima de 200MB"
+
+  - name: mongo-alerts
+    rules:
+
+      # 🚨 Mongo fora do ar
+      - alert: MongoDown
+        expr: up{job="mongo-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB está fora"
+          description: "Exporter não consegue acessar o Mongo"
+
+      # ⚠️ Muitas conexões
+      - alert: MongoTooManyConnections
+        expr: mongodb_connections{state="current"} > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitas conexões no Mongo"
+          description: "Mais de 100 conexões ativas"
+
+      # 🐢 Queries lentas
+      - alert: MongoSlowQueries
+        expr: rate(mongodb_op_counters_total[1m]) < 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Possível lentidão no Mongo"
+          description: "Baixa taxa de operações"
