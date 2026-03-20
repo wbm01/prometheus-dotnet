@@ -5,7 +5,7 @@ route:
   receiver: "default"
   group_wait: 10s
   group_interval: 30s
-  repeat_interval: 1h
+  repeat_interval: 1m
 
   routes:
     - match:

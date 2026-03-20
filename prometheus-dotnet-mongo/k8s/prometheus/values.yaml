@@ -1253,7 +1253,7 @@ alertmanager:
       receiver: default
       group_wait: 10s
       group_interval: 30s
-      repeat_interval: 1h
+      repeat_interval: 1m
 
       routes:
         - match:
@@ -1265,7 +1265,7 @@ alertmanager:
 
       - name: critical
         webhook_configs:
-          - url: "http://localhost:5001/alerts"
+          - url: "http://localhost:8081/alerts"
 
       - name: "warning"
         webhook_configs:

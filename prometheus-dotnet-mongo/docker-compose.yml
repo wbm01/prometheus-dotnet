@@ -8,6 +8,8 @@ services:
       - ASPNETCORE_URLS=http://+:8080
     depends_on:
       - mongo
+    networks:
+      - prometheus-net
 
   mongo:
     image: mongo:7
@@ -19,6 +21,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin123
     volumes:
       - mongo_data:/data/db
+    networks:
+      - prometheus-net
 
   mongoexporter:
     image: fabricioveronez/mongo_exporter
@@ -29,14 +33,35 @@ services:
       - mongo
     environment:
       MONGODB_URI: "mongodb://admin:admin123@mongo:27017/?authSource=admin"
+    networks:
+      - prometheus-net
 
   prometheus:
     image: prom/prometheus
     container_name: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./k8s/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./k8s/prometheus/alert.rules.yaml:/etc/prometheus/alert.rules
     ports:
       - "9090:9090"
+    networks:
+      - prometheus-net
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    volumes:
+      - ./k8s/prometheus/alertmanager.yaml:/prometheus/alertmanager.yaml
+    command:
+      - '--config.file=/prometheus/alertmanager.yaml'
+    ports:
+      - "9093:9093"
+    networks:
+      - prometheus-net
 
 volumes:
   mongo_data:
+
+networks:
+  prometheus-net:
+    driver: bridge
